@@ -1,0 +1,32 @@
+name: Deploy Node Application
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+    build:
+      runs-on: ubuntu-latest
+      steps:
+        - name: Checkout Source Code
+          uses: actions/checkout@v4
+
+        - name: Login to Docker Hub
+          run: docker login -u ${{secrets.DOCKER_USERNAME}} -p ${{secrets.DOCKER_PASSWORD}}
+          
+        - name: Build Docker Image
+          run: docker build -t ${{secrets.DOCKER_USERNAME}}/node-app .
+
+         - name: Publish Docker Image to Docker Hub
+           run: docker push ${{secrets.DOCKER_USERNAME}}/node-app:latest
+    deploy:
+      needs: build
+      runs-on: self-hosted
+      steps:
+        -name: Pull Docker Image from Docker Hub
+          run: docker pull ${{secrets.DOCKER_USERNAME}}/node-app:latest
+        -name: Run docker container
+          run: docker run -d -p 4000:4000 ${{secrets.DOCKER_USERNAME}}/node-app:latest -e PORT=${{secrets.PORT}} -e MONGO_URI=${{secrets.MONGO_URI}} -e JWT_SECRET=${{secrets.JWT_SECRET}}
+
+        
