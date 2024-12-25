@@ -11,3 +11,5 @@ const connectDB = async(req,res)=>{
 }
 
 export default connectDB;
+
+// mongodb://localhost:27017/HRMS_DB
